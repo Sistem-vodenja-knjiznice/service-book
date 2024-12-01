@@ -4,8 +4,38 @@ from rest_framework.response import Response
 from .models import Book
 from .serializers import BookSerializer
 
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
-class UserViewSet(viewsets.ViewSet):
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="List all books",
+        description="Returns a list of all books.",
+        responses=BookSerializer,
+    ),
+    retrieve=extend_schema(
+        summary="Get a book by ID",
+        description="Returns a single book by its ID.",
+        responses=BookSerializer,
+    ),
+    create=extend_schema(
+        summary="Create a book",
+        description="Creates a new book.",
+        request=BookSerializer,
+        responses=BookSerializer,
+    ),
+    update=extend_schema(
+        summary="Update a book",
+        description="Updates an existing book.",
+        request=BookSerializer,
+        responses=BookSerializer,
+    ),
+    destroy=extend_schema(
+        summary="Delete a book",
+        description="Deletes a book.",
+    ),
+)
+class BookViewSet(viewsets.ViewSet):
     def list(self, request):
         books = Book.objects.all()
         serializer = BookSerializer(books, many=True)
