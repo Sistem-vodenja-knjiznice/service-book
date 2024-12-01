@@ -6,6 +6,7 @@ class Book(models.Model):
     year = models.IntegerField()
     isbn = models.CharField(max_length=13)
     pages = models.IntegerField()
+    stock = models.IntegerField()
 
     def __str__(self):
         return self.title

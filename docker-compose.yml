@@ -11,6 +11,16 @@ services:
       - db
     entrypoint: ["./wait-for-it.sh", "db:3306", "--", "python", "manage.py", "runserver", "0.0.0.0:8001"]
 
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: 'python consumer.py'
+    environment:
+      - DJANGO_SETTINGS_MODULE=api.settings
+    depends_on:
+      - db
+
   db:
     image: mysql:8.0
     restart: always
