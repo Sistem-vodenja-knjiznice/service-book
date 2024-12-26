@@ -1,15 +1,18 @@
 services:
-  backend:
+  service-book:
     build:
       context: .
       dockerfile: Dockerfile
+    image: api-book:v1
+    env_file:
+      - .env
+    environment:
+      - PORT=8010
     ports:
-      - "8001:8001"
-    volumes:
-      - .:/app
+      - "8001:8010"
+    command: sh -c "chmod +x /app/migrate.sh && sh /app/migrate.sh && /app/entrypoint.sh"
     depends_on:
       - db
-    entrypoint: ["./wait-for-it.sh", "db:3306", "--", "python", "manage.py", "runserver", "0.0.0.0:8001"]
 
   queue:
     build:
@@ -23,11 +26,17 @@ services:
 
   db:
     image: mysql:8.0
-    restart: always
-    environment:
-        MYSQL_DATABASE: book
-        MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - .db_data:/var/lib/mysql
+    expose:
+      - 33067
     ports:
       - "33067:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    env_file:
+      - .env
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+    restart: always
+
+volumes:
+  db_data:
