@@ -56,7 +56,7 @@ jobs:
       - name: Update deployment image
         run: |
             kubectl set image deployment/service-book-deployment service-book=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
-            kubectl set image deployment/service-book-consumer-deployment service-book=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
+            kubectl set image deployment/service-book-consumer-deployment service-book-consumer=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
       - name: Wait for rollout to finish
         run: |
           kubectl rollout status deployment/service-book-deployment
