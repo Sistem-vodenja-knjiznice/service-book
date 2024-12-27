@@ -49,6 +49,7 @@ jobs:
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_HOST=${{ secrets.DB_HOST }}
           DB_PORT=${{ secrets.DB_PORT }}
+          MESSAGE_BROKER_URL=${{ secrets.MESSAGE_BROKER_URL }}
           EOF
           kubectl delete secret django-k8s-book-prod-env --ignore-not-found
           kubectl create secret generic django-k8s-book-prod-env --from-env-file=.env.prod

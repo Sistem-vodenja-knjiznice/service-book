@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-book-consumer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-book-consumer
+  template:
+    metadata:
+      labels:
+        app: service-book-consumer
+    spec:
+      containers:
+        - name: service-book-consumer
+          image: registry.digitalocean.com/rso-vaje/service-book:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: django-k8s-book-prod-env
+          env:
+            - name: RUN_CONSUMER
+              value: "true"
+      imagePullSecrets:
+        - name: registry-rso-vaje
