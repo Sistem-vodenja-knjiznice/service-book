@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'books',
     'drf_spectacular',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
