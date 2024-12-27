@@ -21,6 +21,9 @@ spec:
           envFrom:
             - secretRef:
                 name: django-k8s-book-prod-env
+          env:
+            - name: RUN_GRPC
+              value: "true"
       imagePullSecrets:
         - name: registry-rso-vaje
 

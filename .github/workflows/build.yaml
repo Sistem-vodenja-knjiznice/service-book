@@ -57,10 +57,12 @@ jobs:
         run: |
             kubectl set image deployment/service-book-deployment service-book=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
             kubectl set image deployment/service-book-consumer-deployment service-book-consumer=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
+            kubectl set image deployment/service-book-grpc-deployment service-book-grpc=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
       - name: Wait for rollout to finish
         run: |
           kubectl rollout status deployment/service-book-deployment
           kubectl rollout status deployment/service-book-consumer-deployment
+          kubectl rollout status deployment/service-book-grpc-deployment
       - name: Migrate Database Command
         run: |
           export SINGLE_POD_NAME=$(kubectl get pod -l app=service-book-deployment -o jsonpath="{.items[0].metadata.name}")
