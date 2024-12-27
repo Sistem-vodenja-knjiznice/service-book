@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-book-grpc-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-book-grpc
+  template:
+    metadata:
+      labels:
+        app: service-book-grpc
+    spec:
+      containers:
+        - name: service-book-grpc
+          image: registry.digitalocean.com/rso-vaje/service-book:latest
+          ports:
+            - containerPort: 50051
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: django-k8s-book-prod-env
+      imagePullSecrets:
+        - name: registry-rso-vaje
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-service
+  labels:
+    app: service-book-grpc
+spec:
+  selector:
+    app: service-book-grpc
+  ports:
+    - protocol: TCP
+      port: 50051
+      targetPort: 50051
+  type: ClusterIP
