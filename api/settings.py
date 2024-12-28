@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'books',
     'drf_spectacular',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
@@ -113,6 +114,26 @@ if DB_AVAILABLE:
             'PORT': DB_PORT,
         }
     }
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+    'django': {
+        'handlers': ['console'],
+        'level': 'INFO',
+        'propagate': True,
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

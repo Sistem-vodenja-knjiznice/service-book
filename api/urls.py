@@ -16,12 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from graphene_django.views import GraphQLView
+
+from .schema import schema
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/books/graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
     path('api/', include('books.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
