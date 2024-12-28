@@ -70,6 +70,6 @@ class BookViewSet(viewsets.ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def health_check(request):
+    def health_check(self, request):
         health_status = {"status": "healthy"}
         return JsonResponse(health_status, status=200)
