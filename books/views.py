@@ -47,7 +47,7 @@ class BookViewSet(viewsets.ViewSet):
         book = Book.objects.get(id=pk)
 
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-        google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&&key={GOOGLE_API_KEY}"
+        google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&key={GOOGLE_API_KEY}&langRestrict=en"
 
         response = requests.get(google_books_api_url)
         if response.status_code != 200:
