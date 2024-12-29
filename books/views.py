@@ -45,10 +45,29 @@ class BookViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         book = Book.objects.get(id=pk)
+
+        GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+        google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&&key={GOOGLE_API_KEY}"
+
+        response = requests.get(google_books_api_url)
+        if response.status_code != 200:
+            return JsonResponse({'error': 'Failed to fetch data from Google Books API'},
+                                status=response.status_code)
+
         serializer = BookSerializer(book)
+        serialized_data = serializer.data
 
-        return Response(serializer.data)
+        try:
+            serialized_data['description'] = response.json()['items'][0]['volumeInfo']['description']
+        except:
+            serialized_data['description'] = 'No description available'
 
+        try:
+            serialized_data['averageRating'] = response.json()['items'][0]['volumeInfo']['averageRating']
+        except:
+            serialized_data['averageRating'] = 'No rating available'
+
+        return Response(serialized_data)
 
     def create(self, request):
         serializer = BookSerializer(data=request.data)
