@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema, extend_schema_view
+import requests, os
 
 from .models import Book
 from .serializers import BookSerializer
