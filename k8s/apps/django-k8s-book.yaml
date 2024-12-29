@@ -24,6 +24,18 @@ spec:
               value: "8001"
           ports:
             - containerPort: 8001
+          livenessProbe:
+            httpGet:
+              path: /api/books/health
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/books/health
+              port: 8001
+            initialDelaySeconds: 3
+            periodSeconds: 5
       imagePullSecrets:
         - name: registry-rso-vaje
 

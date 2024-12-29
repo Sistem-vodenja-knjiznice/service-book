@@ -1,10 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from .models import Book
 from .serializers import BookSerializer
-
-from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
 @extend_schema_view(
@@ -69,3 +69,7 @@ class BookViewSet(viewsets.ViewSet):
         book.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def health_check(self, request):
+        health_status = {"status": "healthy"}
+        return JsonResponse(health_status, status=200)
