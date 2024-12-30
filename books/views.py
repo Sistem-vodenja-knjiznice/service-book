@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, extend_schema_view
 import requests, os
 
@@ -69,12 +70,39 @@ class BookViewSet(viewsets.ViewSet):
 
         return Response(serialized_data)
 
+    @csrf_exempt
     def create(self, request):
         serializer = BookSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        DO_SERVERLESS_API = os.getenv('DO_SERVERLESS_API')
+        serverless_url = f'{DO_SERVERLESS_API}/book/add'
+        response = requests.post(serverless_url, json={
+            'title': serializer.data['title'],
+            'author': serializer.data['author'],
+            'year': serializer.data['year'],
+            'pages': serializer.data['pages'],
+            'isbn': serializer.data['isbn'],
+            'stock': serializer.data['stock']
+        })
+
+        if response.status_code == 200:
+            book_data = response.json()
+            new_book = Book(
+                title=book_data['title'],
+                author=book_data['author'],
+                year=book_data['year'],
+                pages=book_data['pages'],
+                isbn=book_data['isbn'],
+                stock=book_data['stock'],
+            )
+            new_book.save()
+
+            new_serializer = BookSerializer(data=new_book)
+
+            return Response(new_serializer.data, status=status.HTTP_201_CREATED)
+
+        else:
+            return JsonResponse({'error': response.json()['body']}, status=response.status_code)
 
     def update(self, request, pk=None):
         book = Book.objects.get(id=pk)

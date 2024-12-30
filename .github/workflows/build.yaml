@@ -51,6 +51,7 @@ jobs:
           DB_PORT=${{ secrets.DB_PORT }}
           MESSAGE_BROKER_URL=${{ secrets.MESSAGE_BROKER_URL }}
           GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+          DO_SERVERLESS_API=${{ secrets.DO_SERVERLESS_API }}
           EOF
           kubectl delete secret django-k8s-book-prod-env --ignore-not-found
           kubectl create secret generic django-k8s-book-prod-env --from-env-file=.env.prod

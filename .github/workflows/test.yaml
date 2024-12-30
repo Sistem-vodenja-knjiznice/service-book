@@ -21,6 +21,7 @@ jobs:
       MYSQL_ROOT_PASSWORD: root
       MESSAGE_BROKER_URL: ${{ secrets.MESSAGE_BROKER_URL }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      DO_SERVERLESS_API: ${{ secrets.DO_SERVERLESS_API }}
     services:
       db:
         image: mysql:8.0
