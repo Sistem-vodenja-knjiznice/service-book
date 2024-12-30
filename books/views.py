@@ -70,15 +70,8 @@ class BookViewSet(viewsets.ViewSet):
 
         return Response(serialized_data)
 
-    def create(self, request):
-        serializer = BookSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
     @csrf_exempt
-    def add_book(self, request):
+    def create(self, request):
         serializer = BookSerializer(data=request.data)
 
         DO_SERVERLESS_API = os.getenv('DO_SERVERLESS_API')
