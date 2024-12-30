@@ -19,23 +19,29 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_API_TOKEN_KEY }}
+
       - name: Login to DigitalOcean Container Registry with short-lived token
         run: doctl registry login --expiry-seconds 300
+
       - name: Build container image
         working-directory: .
         run: | 
           docker build -f Dockerfile -t registry.digitalocean.com/rso-vaje/service-book:latest .
           docker build -f Dockerfile -t registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7} .
+
       - name: Push image
         run: |
           docker push registry.digitalocean.com/rso-vaje/service-book --all-tags
+
       - name: K8s cluster kubeconfig file short-lived credentials
         run: |
           doctl kubernetes cluster kubeconfig save --expiry-seconds 300 ${{ env.CLUSTER_NAME }}
+
       - name: Update deployment secrets
         run: |
           cat << EOF >> .env.prod
@@ -55,17 +61,23 @@ jobs:
           EOF
           kubectl delete secret django-k8s-book-prod-env --ignore-not-found
           kubectl create secret generic django-k8s-book-prod-env --from-env-file=.env.prod
-      - name: Update deployment image
+
+      # Helm upgrade/install step
+      - name: Helm upgrade/install with the new image
         run: |
-            kubectl set image deployment/service-book-deployment service-book=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
-            kubectl set image deployment/service-book-consumer-deployment service-book-consumer=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
-            kubectl set image deployment/service-book-grpc-deployment service-book-grpc=registry.digitalocean.com/rso-vaje/service-book:${GITHUB_SHA::7}
+          helm upgrade --install book ./k8s/book \
+            --set image.tag=${GITHUB_SHA::7} \
+            --set env.secrets.name=django-k8s-book-prod-env \
+            --namespace default \
+            --wait --timeout 30s
+
       - name: Wait for rollout to finish
         run: |
-          kubectl rollout status deployment/service-book-deployment
-          kubectl rollout status deployment/service-book-consumer-deployment
-          kubectl rollout status deployment/service-book-grpc-deployment
+          kubectl rollout status deployment/book --namespace default
+          kubectl rollout status deployment/book-rabbitmq --namespace default
+          kubectl rollout status deployment/book-grpc --namespace default
+
       - name: Migrate Database Command
         run: |
-          export SINGLE_POD_NAME=$(kubectl get pod -l app=service-book-deployment -o jsonpath="{.items[0].metadata.name}")
+          export SINGLE_POD_NAME=$(kubectl get pod -l app=book -o jsonpath="{.items[0].metadata.name}")
           kubectl exec -it $SINGLE_POD_NAME -- bash /app/migrate.sh

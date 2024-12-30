@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "book.fullname" . }}-grpc
+  labels:
+    app: {{ include "book.fullname" . }}-grpc
+spec:
+  {{- if not .Values.grpc.autoscaling.enabled }}
+  replicas: {{ .Values.grpc.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "book.fullname" . }}-grpc
+  template:
+    metadata:
+      {{- with .Values.grpc.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ include "book.fullname" . }}-grpc
+    spec:
+      {{- with .Values.grpc.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "book.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.grpc.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.grpc.securityContext | nindent 12 }}
+          image: "{{ .Values.grpc.image.repository }}:{{ .Values.grpc.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.grpc.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.grpc.service.port }}
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ .Values.grpc.env.secrets.name }}
+          env:
+            {{- range .Values.grpc.env.variables }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+          resources:
+            {{- toYaml .Values.grpc.resources | nindent 12 }}
+          {{- with .Values.grpc.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.grpc.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grpc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grpc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grpc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
