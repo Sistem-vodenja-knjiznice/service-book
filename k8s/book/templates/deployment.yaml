@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "book.fullname" . }}
+  labels:
+    app: {{ include "book.fullname" . }}
+spec:
+  {{- if not .Values.book.autoscaling.enabled }}
+  replicas: {{ .Values.book.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "book.fullname" . }}
+  template:
+    metadata:
+      {{- with .Values.book.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ include "book.fullname" . }}
+    spec:
+      {{- with .Values.book.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "book.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.book.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.book.securityContext | nindent 12 }}
+          image: "{{ .Values.book.image.repository }}:{{ .Values.book.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.book.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.book.service.port }}
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ .Values.book.env.secrets.name }}
+          env:
+            {{- range .Values.book.env.variables }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.book.probes.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.book.probes.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.book.resources | nindent 12 }}
+          {{- with .Values.book.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.book.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.book.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.book.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.book.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

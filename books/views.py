@@ -74,6 +74,9 @@ class BookViewSet(viewsets.ViewSet):
     def create(self, request):
         serializer = BookSerializer(data=request.data)
 
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
         DO_SERVERLESS_API = os.getenv('DO_SERVERLESS_API')
         serverless_url = f'{DO_SERVERLESS_API}/book/add'
         response = requests.post(serverless_url, json={

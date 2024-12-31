@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "book.fullname" . }}-rabbitmq
+  labels:
+    app: {{ include "book.fullname" . }}-rabbitmq
+spec:
+  {{- if not .Values.rabbitmq.autoscaling.enabled }}
+  replicas: {{ .Values.rabbitmq.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "book.fullname" . }}-rabbitmq
+  template:
+    metadata:
+      {{- with .Values.rabbitmq.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ include "book.fullname" . }}-rabbitmq
+    spec:
+      {{- with .Values.rabbitmq.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "book.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.rabbitmq.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.rabbitmq.securityContext | nindent 12 }}
+          image: "{{ .Values.rabbitmq.image.repository }}:{{ .Values.rabbitmq.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.rabbitmq.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.rabbitmq.env.secrets.name }}
+          env:
+            {{- range .Values.rabbitmq.env.variables }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+          resources:
+            {{- toYaml .Values.rabbitmq.resources | nindent 12 }}
+          {{- with .Values.rabbitmq.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.rabbitmq.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rabbitmq.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rabbitmq.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rabbitmq.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

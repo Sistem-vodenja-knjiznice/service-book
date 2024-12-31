@@ -1,0 +1,115 @@
+# values.yaml
+
+book:
+  replicaCount: 3
+
+  image:
+    repository: registry.digitalocean.com/rso-vaje/service-book
+    tag: "latest"
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 8001
+
+  env:
+    secrets:
+      name: django-k8s-book-prod-env
+    variables:
+      - name: PORT
+        value: "8001"
+
+  probes:
+    livenessProbe:
+      httpGet:
+        path: /api/books/health
+        port: 8001
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        path: /api/books/health
+        port: 8001
+      initialDelaySeconds: 3
+      periodSeconds: 5
+
+  imagePullSecrets:
+    - name: registry-rso-vaje
+
+  autoscaling:
+    enabled: false  # Set to true to enable Horizontal Pod Autoscaler (HPA)
+    minReplicas: 1  # Minimum number of replicas
+    maxReplicas: 5  # Maximum number of replicas
+    targetCPUUtilizationPercentage: 80
+
+rabbitmq:
+  replicaCount: 1
+
+  image:
+    repository: registry.digitalocean.com/rso-vaje/service-book
+    tag: "latest"
+    pullPolicy: Always
+
+  env:
+    secrets:
+      name: django-k8s-book-prod-env
+    variables:
+      - name: RUN_CONSUMER
+        value: "true"
+
+  imagePullSecrets:
+    - name: registry-rso-vaje
+
+  autoscaling:
+    enabled: false  # Set to true to enable Horizontal Pod Autoscaler (HPA)
+    minReplicas: 1  # Minimum number of replicas
+    maxReplicas: 5  # Maximum number of replicas
+    targetCPUUtilizationPercentage: 80
+
+grpc:
+  name: book
+  replicaCount: 2
+
+  image:
+    repository: registry.digitalocean.com/rso-vaje/service-book
+    tag: "latest"
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 50051
+
+  env:
+    secrets:
+      name: django-k8s-book-prod-env
+    variables:
+      - name: RUN_GRPC
+        value: "true"
+      - name: PYTHONUNBUFFERED
+        value: "1"
+
+  imagePullSecrets:
+    - name: registry-rso-vaje
+
+  autoscaling:
+    enabled: false  # Set to true to enable Horizontal Pod Autoscaler (HPA)
+    minReplicas: 1  # Minimum number of replicas
+    maxReplicas: 5  # Maximum number of replicas
+    targetCPUUtilizationPercentage: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  hosts:
+    - host:
+      paths:
+        - path: /api/books
+          pathType: Prefix
+          service:
+            port:
+              number: 8001
+
+serviceAccount:
+  create: true
+  name: ""
