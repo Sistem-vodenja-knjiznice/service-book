@@ -22,6 +22,7 @@ jobs:
       MESSAGE_BROKER_URL: ${{ secrets.MESSAGE_BROKER_URL }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       DO_SERVERLESS_API: ${{ secrets.DO_SERVERLESS_API }}
+      PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
     services:
       db:
         image: mysql:8.0
@@ -37,7 +38,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.11]
+        python-version: [3.11, 3.10]
 
     steps:
       - uses: actions/checkout@v4
