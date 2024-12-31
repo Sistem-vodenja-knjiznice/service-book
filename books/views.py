@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, extend_schema_view
-import requests, os
+import requests, os, etcd3
 
 from .models import Book
 from .serializers import BookSerializer
@@ -47,7 +47,12 @@ class BookViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         book = Book.objects.get(id=pk)
 
-        GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+        etcd = etcd3.client(host=os.getenv('ETCD_HOST'),
+                            port=os.getenv('ETCD_PORT'),
+                            user=os.getenv('ETCD_USER'),
+                            password=os.getenv('ETCD_PASSWORD'))
+
+        GOOGLE_API_KEY = etcd.get('GOOGLE_API_KEY')[0]
         google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&key={GOOGLE_API_KEY}&langRestrict=en"
 
         response = requests.get(google_books_api_url)
