@@ -47,6 +47,11 @@ class BookViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         book = Book.objects.get(id=pk)
 
+        print(os.getenv('ETCD_HOST'))
+        print(os.getenv('ETCD_PORT'))
+        print(os.getenv('ETCD_USERNAME'))
+        print(os.getenv('ETCD_PASSWORD'))
+
         etcd = etcd3.client(host=os.getenv('ETCD_HOST'),
                             port=os.getenv('ETCD_PORT'),
                             user=os.getenv('ETCD_USERNAME'),
