@@ -49,7 +49,7 @@ class BookViewSet(viewsets.ViewSet):
 
         etcd = etcd3.client(host=os.getenv('ETCD_HOST'),
                             port=os.getenv('ETCD_PORT'),
-                            user=os.getenv('ETCD_USER'),
+                            user=os.getenv('ETCD_USERNAME'),
                             password=os.getenv('ETCD_PASSWORD'))
 
         GOOGLE_API_KEY = etcd.get('GOOGLE_API_KEY')[0]
