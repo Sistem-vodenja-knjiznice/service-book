@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, extend_schema_view
-import requests, os
+import requests
 
 from .models import Book
 from .serializers import BookSerializer
@@ -47,20 +47,16 @@ class BookViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         book = Book.objects.get(id=pk)
 
-        try:
-            GOOGLE_API_KEY = get_etcd_key('GOOGLE_API_KEY')
-            if not GOOGLE_API_KEY:
-                raise ValueError("GOOGLE_API_KEY not found in etcd")
+        GOOGLE_API_KEY = get_etcd_key('GOOGLE_API_KEY')
+        if not GOOGLE_API_KEY:
+            raise ValueError("GOOGLE_API_KEY not found in etcd")
 
-            google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&key={GOOGLE_API_KEY}&langRestrict=en"
+        google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&key={GOOGLE_API_KEY}&langRestrict=en"
 
-            response = requests.get(google_books_api_url)
-            if response.status_code != 200:
-                return JsonResponse({'error': 'Failed to fetch data from Google Books API'},
-                                    status=response.status_code)
-        except Exception as e:
-            print(f"Error: {e}")
-
+        response = requests.get(google_books_api_url)
+        if response.status_code != 200:
+            return JsonResponse({'error': 'Failed to fetch data from Google Books API'},
+                                status=response.status_code)
 
         serializer = BookSerializer(book)
         serialized_data = serializer.data
@@ -84,8 +80,9 @@ class BookViewSet(viewsets.ViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
 
-        DO_SERVERLESS_API = os.getenv('DO_SERVERLESS_API')
+        DO_SERVERLESS_API = get_etcd_key('DO_SERVERLESS_API')
         serverless_url = f'{DO_SERVERLESS_API}/book/add'
+
         response = requests.post(serverless_url, json={
             'title': serializer.data['title'],
             'author': serializer.data['author'],

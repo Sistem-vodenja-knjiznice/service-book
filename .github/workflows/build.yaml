@@ -66,7 +66,6 @@ jobs:
           kubectl delete secret django-k8s-book-prod-env --ignore-not-found
           kubectl create secret generic django-k8s-book-prod-env --from-env-file=.env.prod
 
-      # Helm upgrade/install step
       - name: Helm upgrade/install with the new image
         run: |
           helm upgrade --install book ./k8s/book \
@@ -74,6 +73,12 @@ jobs:
             --set env.secrets.name=django-k8s-book-prod-env \
             --namespace default \
             --wait --timeout 120s
+
+      - name: Restart pods after Helm upgrade
+        run: |
+          kubectl rollout restart deployment/book --namespace default
+          kubectl rollout restart deployment/book-rabbitmq --namespace default
+          kubectl rollout restart deployment/book-grpc --namespace default
 
       - name: Wait for rollout to finish
         run: |
