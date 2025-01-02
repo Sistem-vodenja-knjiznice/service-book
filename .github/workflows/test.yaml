@@ -22,6 +22,10 @@ jobs:
       MESSAGE_BROKER_URL: ${{ secrets.MESSAGE_BROKER_URL }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       DO_SERVERLESS_API: ${{ secrets.DO_SERVERLESS_API }}
+      ETCD_HOST: ${{ secrets.ETCD_HOST }}
+      ETCD_PORT: ${{ secrets.ETCD_PORT }}
+      ETCD_USERNAME: ${{ secrets.ETCD_USERNAME }}
+      ETCD_PASSWORD: ${{ secrets.ETCD_PASSWORD }}
       PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
     services:
       db:
@@ -47,6 +51,11 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Install etcd-client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y etcd-client
 
       - name: Install Dependencies
         run: |

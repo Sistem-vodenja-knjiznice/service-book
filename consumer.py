@@ -7,8 +7,9 @@ django.setup()
 load_dotenv()
 
 from books.models import Book
+from books.etcd_gateway import get_etcd_key
 
-MESSAGE_BROKER_URL = os.getenv('MESSAGE_BROKER_URL')
+MESSAGE_BROKER_URL = get_etcd_key('MESSAGE_BROKER_URL')
 
 params = pika.URLParameters(MESSAGE_BROKER_URL)
 

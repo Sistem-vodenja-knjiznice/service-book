@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, extend_schema_view
-import requests, os, etcd3
+import requests
 
 from .models import Book
 from .serializers import BookSerializer
-
+from .etcd_gateway import get_etcd_key
 
 @extend_schema_view(
     list=extend_schema(
@@ -47,12 +47,10 @@ class BookViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         book = Book.objects.get(id=pk)
 
-        etcd = etcd3.client(host=os.getenv('ETCD_HOST'),
-                            port=os.getenv('ETCD_PORT'),
-                            user=os.getenv('ETCD_USER'),
-                            password=os.getenv('ETCD_PASSWORD'))
+        GOOGLE_API_KEY = get_etcd_key('GOOGLE_API_KEY')
+        if not GOOGLE_API_KEY:
+            raise ValueError("GOOGLE_API_KEY not found in etcd")
 
-        GOOGLE_API_KEY = etcd.get('GOOGLE_API_KEY')[0]
         google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&key={GOOGLE_API_KEY}&langRestrict=en"
 
         response = requests.get(google_books_api_url)
@@ -82,8 +80,9 @@ class BookViewSet(viewsets.ViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
 
-        DO_SERVERLESS_API = os.getenv('DO_SERVERLESS_API')
+        DO_SERVERLESS_API = get_etcd_key('DO_SERVERLESS_API')
         serverless_url = f'{DO_SERVERLESS_API}/book/add'
+
         response = requests.post(serverless_url, json={
             'title': serializer.data['title'],
             'author': serializer.data['author'],
