@@ -15,4 +15,4 @@ def get_etcd_key(key):
     print("Output:", result.stdout.decode('utf-8'))
     print("Error:", result.stderr.decode('utf-8') if result.stderr else "No errors")
 
-    return result.stdout.decode('utf-8').split('\n')[0] if result.stdout else None
+    return result.stdout.decode('utf-8').split('\n')[1] if result.stdout else None
