@@ -47,23 +47,26 @@ class BookViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         book = Book.objects.get(id=pk)
 
-        print(os.getenv('ETCD_HOST'))
-        print(os.getenv('ETCD_PORT'))
-        print(os.getenv('ETCD_USERNAME'))
-        print(os.getenv('ETCD_PASSWORD'))
+        host = os.getenv('ETCD_HOST')
+        port = os.getenv('ETCD_PORT')
+        username = os.getenv('ETCD_USERNAME')
+        password = os.getenv('ETCD_PASSWORD')
 
-        etcd = etcd3.client(host=os.getenv('ETCD_HOST'),
-                            port=os.getenv('ETCD_PORT'),
-                            user=os.getenv('ETCD_USERNAME'),
-                            password=os.getenv('ETCD_PASSWORD'))
+        try:
+            etcd = etcd3.client(host=host, port=port, user=username, password=password)
+            GOOGLE_API_KEY, _ = etcd.get('GOOGLE_API_KEY') or (None, None)
+            if not GOOGLE_API_KEY:
+                raise ValueError("GOOGLE_API_KEY not found in etcd")
 
-        GOOGLE_API_KEY = etcd.get('GOOGLE_API_KEY')[0]
-        google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&key={GOOGLE_API_KEY}&langRestrict=en"
+            google_books_api_url = f"https://www.googleapis.com/books/v1/volumes?q={book.title}&key={GOOGLE_API_KEY}&langRestrict=en"
 
-        response = requests.get(google_books_api_url)
-        if response.status_code != 200:
-            return JsonResponse({'error': 'Failed to fetch data from Google Books API'},
-                                status=response.status_code)
+            response = requests.get(google_books_api_url)
+            if response.status_code != 200:
+                return JsonResponse({'error': 'Failed to fetch data from Google Books API'},
+                                    status=response.status_code)
+        except Exception as e:
+            print(f"Error: {e}")
+
 
         serializer = BookSerializer(book)
         serialized_data = serializer.data
