@@ -2,39 +2,98 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse, OpenApiExample
 import requests
 
 from .models import Book
-from .serializers import BookSerializer
+from .serializers import BookSerializer, BookEnrichedSerializer
 from .etcd_gateway import get_etcd_key
 
 @extend_schema_view(
     list=extend_schema(
         summary="List all books",
-        description="Returns a list of all books.",
-        responses=BookSerializer,
+        description="Returns a list of all books in the database.",
+        responses={
+            200: OpenApiResponse(
+                response=BookSerializer(many=True),
+                description="List of books",
+            ),
+            400: OpenApiResponse(
+                description="Bad Request"
+            ),
+        },
     ),
     retrieve=extend_schema(
         summary="Get a book by ID",
         description="Returns a single book by its ID.",
-        responses=BookSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=BookEnrichedSerializer,
+                description="Book details",
+            ),
+            404: OpenApiResponse(
+                description="Book not found",
+            ),
+        },
     ),
     create=extend_schema(
         summary="Create a book",
         description="Creates a new book.",
         request=BookSerializer,
-        responses=BookSerializer,
+        responses={
+            201: OpenApiResponse(
+                response=BookSerializer,
+                description="Created book",
+            ),
+            400: OpenApiResponse(
+                description="Validation error",
+            ),
+        },
     ),
     update=extend_schema(
         summary="Update a book",
         description="Updates an existing book.",
         request=BookSerializer,
-        responses=BookSerializer,
+        responses={
+            202: OpenApiResponse(
+                response=BookSerializer,
+                description="Updated book",
+            ),
+            400: OpenApiResponse(
+                description="Validation error",
+            ),
+            404: OpenApiResponse(
+                description="Book not found",
+            ),
+        },
     ),
     destroy=extend_schema(
         summary="Delete a book",
         description="Deletes a book.",
+        responses={
+            204: OpenApiResponse(
+                description="Book deleted successfully",
+            ),
+            404: OpenApiResponse(
+                description="Book not found",
+            ),
+        },
+    ),
+    health_check=extend_schema(
+        summary="Health check",
+        description="Returns the health status of the service.",
+        responses={
+            200: OpenApiResponse(
+                description="Service is healthy",
+                examples=[
+                    OpenApiExample(
+                        name="Health Check Response",
+                        value={"status": "healthy"},
+                        response_only=True,
+                    )
+                ],
+            ),
+        },
     ),
 )
 class BookViewSet(viewsets.ViewSet):
