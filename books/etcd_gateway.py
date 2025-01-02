@@ -12,4 +12,7 @@ def get_etcd_key(key):
 
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+    print("Output:", result.stdout.decode('utf-8'))
+    print("Error:", result.stderr.decode('utf-8') if result.stderr else "No errors")
+
     return result.stdout.decode('utf-8').split('\n')[0] if result.stdout else None
