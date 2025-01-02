@@ -26,10 +26,10 @@ SECRET_KEY = get_etcd_key('BOOK/DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(get_etcd_key('DEBUG')) == '1'
-ENV_ALLOWED_HOST = get_etcd_key('BOOK/ENV_ALLOWED_HOST').split(',')
+ENV_ALLOWED_HOST = get_etcd_key('BOOK/ENV_ALLOWED_HOST')
 
 if ENV_ALLOWED_HOST:
-    ALLOWED_HOSTS = ENV_ALLOWED_HOST
+    ALLOWED_HOSTS = ENV_ALLOWED_HOST.split(',')
 
 # Application definition
 
