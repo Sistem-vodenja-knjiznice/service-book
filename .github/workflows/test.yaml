@@ -56,7 +56,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y etcd-client
-
+      
+      - name: Debug Environment Variables
+        run: |
+          echo "ETCD_HOST=$ETCD_HOST"
+          echo "ETCD_PORT=$ETCD_PORT"
+          echo "ETCD_USERNAME=$ETCD_USERNAME"
+          
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
