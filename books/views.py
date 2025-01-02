@@ -52,6 +52,8 @@ class BookViewSet(viewsets.ViewSet):
         username = os.getenv('ETCD_USERNAME')
         password = os.getenv('ETCD_PASSWORD')
 
+        print(f"Connecting to etcd at {host}:{port} with user {username} and password {password}")
+
         try:
             etcd = etcd3.client(host=host, port=port, user=username, password=password)
             GOOGLE_API_KEY, _ = etcd.get('GOOGLE_API_KEY') or (None, None)
