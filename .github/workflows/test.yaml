@@ -62,6 +62,7 @@ jobs:
           echo "ETCD_HOST=$ETCD_HOST"
           echo "ETCD_PORT=$ETCD_PORT"
           echo "ETCD_USERNAME=$ETCD_USERNAME"
+          echo "GOOGLE_API_KEY=$GOOGLE_API_KEY"
           
       - name: Install Dependencies
         run: |
