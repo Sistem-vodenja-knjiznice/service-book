@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, extend_schema_view
-import requests, os, etcd3
+import requests, os
 
 from .models import Book
 from .serializers import BookSerializer
-
+from .etcd_gateway import get_etcd_key
 
 @extend_schema_view(
     list=extend_schema(
@@ -47,16 +47,8 @@ class BookViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         book = Book.objects.get(id=pk)
 
-        host = os.getenv('ETCD_HOST')
-        port = os.getenv('ETCD_PORT')
-        username = os.getenv('ETCD_USERNAME')
-        password = os.getenv('ETCD_PASSWORD')
-
-        print(f"Connecting to etcd at {host}:{port} with user {username} and password {password}")
-
         try:
-            etcd = etcd3.client(host=host, port=port, user=username, password=password)
-            GOOGLE_API_KEY, _ = etcd.get('GOOGLE_API_KEY') or (None, None)
+            GOOGLE_API_KEY = get_etcd_key('GOOGLE_API_KEY')
             if not GOOGLE_API_KEY:
                 raise ValueError("GOOGLE_API_KEY not found in etcd")
 
