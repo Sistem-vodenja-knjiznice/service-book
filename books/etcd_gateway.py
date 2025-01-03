@@ -1,6 +1,14 @@
 import subprocess, os
 
 def get_etcd_key(key):
+    debug = 1
+    if debug:
+        splited = key.split('/')
+        if len(splited) > 1:
+            return os.getenv(splited[1])
+        else:
+            return os.getenv(key)
+
     host = os.getenv('ETCD_HOST')
     port = os.getenv('ETCD_PORT')
     username = os.getenv('ETCD_USERNAME')
