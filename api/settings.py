@@ -97,6 +97,7 @@ DB_USERNAME = get_etcd_key('BOOK/DB_USERNAME')
 DB_PASSWORD = get_etcd_key('BOOK/DB_PASSWORD')
 DB_HOST = get_etcd_key('BOOK/DB_HOST')
 DB_PORT = get_etcd_key('BOOK/DB_PORT')
+
 DB_AVAILABLE= all([
     DB_NAME,
     DB_USERNAME,

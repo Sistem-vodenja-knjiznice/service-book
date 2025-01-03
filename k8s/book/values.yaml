@@ -18,8 +18,6 @@ book:
     variables:
       - name: PORT
         value: "8001"
-      - name: PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
-        value: python
       - name: PYTHONUNBUFFERED
         value: "1"
 
