@@ -26,7 +26,6 @@ jobs:
       ETCD_PORT: ${{ secrets.ETCD_PORT }}
       ETCD_USERNAME: ${{ secrets.ETCD_USERNAME }}
       ETCD_PASSWORD: ${{ secrets.ETCD_PASSWORD }}
-      PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
     services:
       db:
         image: mysql:8.0
